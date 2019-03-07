@@ -1,0 +1,422 @@
+# Select the perturbation Words
+Strategy = "Swap"    # Strategy = "Shuffle"   or Strategy = "Antonym"
+
+# Determine Token is Adjective ,Verb or Adverb
+DetermineToken = "Adj"  #   Strategy = "Verb"   or Strategy = "Adv"
+
+# Write the Name of File that is written the Results.
+NameFielWriting = "SwapAdj.txt"   
+
+
+# 1. Load Dataset and the Models
+#  The Library
+import time   
+import nltk
+from nltk.corpus import wordnet
+from nltk import SpaceTokenizer
+from random import randint
+import os
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import numpy as np
+import random
+import numpy
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import keras.utils
+from keras import utils as np_utils
+from keras.utils import to_categorical
+from keras import models
+import datetime
+
+print(datetime.datetime.now().time())
+
+# Load the model 
+from keras.models import load_model
+#  the first Model is CNN-LSTM
+model_conv = load_model('modelCNNLSTM5.h5')
+model_conv.summary()
+#  the Second Model is LSTM
+model_conv2 = load_model('modelLSTMB.h5')
+model_conv2.summary()
+
+# Read the data
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import nltk
+from nltk.corpus import stopwords
+
+# the download data and change it to CSV file 
+yelp = pd.read_csv('yelp_review.csv')
+reviews=yelp[:500000]    
+texts = reviews["text"].values
+labels = reviews["labels"].values
+
+NUM_WORDS=1000 
+MSEQUENCE_LENGTH=100 
+
+tokenizer = Tokenizer(num_words=NUM_WORDS)
+tokenizer.fit_on_texts(texts)
+
+reviewsTest=yelp[600000:650000]  
+textsTest = reviewsTest["text"].values
+labelsTest = reviewsTest["labels"].values
+print(textsTest.shape)
+print(labelsTest.shape)
+
+
+# Modified the words
+word_index = tokenizer.word_index
+
+def swap(TryWord):
+    OldWord = TryWord 
+    if len(TryWord) >= 4 :
+        tray = 0
+        #while ( TryWord == OldWord or tray != 2 ) :
+        x = list(TryWord)
+        e= randint(1, len(TryWord)-2)  # if I cahne 0 to 1  it will become like papers
+        f = e+1   #   Note : about index out of range
+        x[e], x[f] = x[f], x[e]
+        TryWord = ''.join(x)  
+        tray = tray + 1
+    return TryWord
+
+
+def shuffle(TryWord):
+    if len(TryWord) >= 4 :
+        wordlen = len(TryWord)
+        TryWord = list(TryWord)
+        for i in range(1,wordlen-2):
+            pos = randint(i+1,wordlen-2)
+            TryWord[i], TryWord[pos] = TryWord[pos], TryWord[i]
+        TryWord = "".join(TryWord)
+    return TryWord
+
+	
+
+nltk.download('wordnet')
+
+def antonym(TryWord):
+	if len(TryWord) >= 4 :
+		antonyms = []
+		for syn in wordnet.synsets(TryWord):
+			for lm in syn.lemmas():
+				if lm.antonyms():
+                        antonyms.append(lm.antonyms()[0].name())
+		if(len(antonyms) !=0 ):
+			TryWord = antonyms[0]
+		else :
+			TryWord = "aaaa"
+		return TryWord
+
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
+def ChangingWords(givenText, ThePosition): 
+    sent =  givenText
+    #words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    info = ""
+    l = 0
+    NewList =""
+    limit = 0 
+	#---------- Adj-----------
+	if DetermineToken == "Adj" :
+		while ( l < k):
+			i , j = words2[l]
+			if  (len(i) >= 4)  and (j == 'JJ' or j == 'JJR' or j == 'JJS') :    
+				limit = limit + 1
+				if limit == ThePosition : 
+					info = i 
+					if( Strategy == "Swap"):
+						newowrd = swap(i)
+					if( Strategy == "Shuffle"):
+						newowrd = shuffle(i)
+					if( Strategy == "Antonym")
+						newowrd = antonym(i)
+					info = info+";"+ newowrd
+					if newowrd in word_index :
+						info = info+";"+"Yes"
+					else :
+						info = info+";"+ "No"
+					limit = limit + 1
+				else :
+					newowrd = i  
+				NewList += newowrd + " "  
+			else : 
+				NewList += i + " " 
+			l = l + 1
+		return (NewList, info)
+	#-------------Verb----------------
+	if DetermineToken == "Verb" :
+		while ( l < k):
+			i , j = words2[l]
+			if  (len(i) >= 4)  and (j == 'VB' or j == 'VBD' or j == 'VBG' or j == 'VBN' or j == 'VBP' or or j == 'VBZ') :    
+				limit = limit + 1
+				if limit == ThePosition : 
+					info = i 
+					if( Strategy == "Swap"):
+						newowrd = swap(i)
+					if( Strategy == "Shuffle"):
+						newowrd = shuffle(i)
+					if( Strategy == "Antonym")
+						newowrd = antonym(i)
+					info = info+";"+ newowrd
+					if newowrd in word_index :
+						info = info+";"+"Yes"
+					else :
+						info = info+";"+ "No"
+					limit = limit + 1
+				else :
+					newowrd = i  
+				NewList += newowrd + " "  
+			else : 
+				NewList += i + " " 
+			l = l + 1
+		return (NewList, info)
+	#-------------Adv----------------
+	if DetermineToken == "Adv" :
+		while ( l < k):
+			i , j = words2[l]
+			if  (len(i) >= 4)  and (j == 'RB' or j == 'RBR' or j == 'RBS') :    
+				limit = limit + 1
+				if limit == ThePosition : 
+					info = i 
+					if( Strategy == "Swap"):
+						newowrd = swap(i)
+					if( Strategy == "Shuffle"):
+						newowrd = shuffle(i)
+					if( Strategy == "Antonym")
+						newowrd = antonym(i)
+					info = info+";"+ newowrd
+					if newowrd in word_index :
+						info = info+";"+"Yes"
+					else :
+						info = info+";"+ "No"
+					limit = limit + 1
+				else :
+					newowrd = i  
+				NewList += newowrd + " "  
+			else : 
+				NewList += i + " " 
+			l = l + 1
+		return (NewList, info)
+
+
+
+def TheNumberofModifiedWords(givenText):
+    sent =  givenText
+    #words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    l = 0
+    Num = 0 
+	if DetermineToken == "Adj" :
+		while ( l < k):
+			i , j = words2[l]
+			if (len(i) >= 4)  and (j == 'JJ' or j == 'JJR' or j == 'JJS'):
+				Num = Num + 1
+			l = l +1
+		return Num
+	if DetermineToken == "Verb" :
+		while ( l < k):
+			i , j = words2[l]
+			if (len(i) >= 4)  and (j == 'VB' or j == 'VBD' or j == 'VBG' or j == 'VBN' or j == 'VBP' or or j == 'VBZ'):
+				Num = Num + 1
+			l = l +1
+        return Num
+	if DetermineToken == "Adv" :
+		while ( l < k):
+			i , j = words2[l]
+			if (len(i) >= 4)  and (j == 'RB' or j == 'RBR' or j == 'RBS'):
+				Num = Num + 1
+			l = l +1
+        return Num
+            
+ 
+Original = []
+Change = []
+InD =[]
+
+NumberWords = []
+    
+FixMissspleingList =[] 
+NewTest_labelsFixx = []
+
+NewNewTest_texts = []
+NewNewTest_labels = []
+traintext = []
+trainlabel = []
+
+TotalWords = 0
+# NOTE : the Test data that only change 
+h = 0
+l = 0
+for Texttt in textsTest :
+ 
+    Num = TheNumberofModifiedWords(Texttt)
+    TotalWords = TotalWords + Num
+    y = 1
+    l = l + 1
+    while  y <= Num : 
+        traintext.append(Texttt)
+        NewNewTest_labels.append(labelsTest[h])
+        (NewList, info2) =ChangingWords(Texttt, y)
+        y = y + 1
+    #######################################
+        txt = info2.split(';')
+        if len(txt) >= 3 :
+            Original.append(txt[0])
+            Change.append(txt[1])
+            InD.append(txt[2])
+        FixMissspleingList.append(NewList)
+        #NewTest_labelsFixx.append(NewTest_labels[h])
+       NumberWords.append(Num)     
+    h = h + 1
+
+    
+
+
+
+# Printing the Accuracy
+sequencesTest = tokenizer.texts_to_sequences((FixMissspleingList))
+Test_data2 = pad_sequences(sequencesTest, maxlen=MSEQUENCE_LENGTH)
+Test_labelsData0 = to_categorical(np.asarray((NewNewTest_labels)))
+
+scores = model_conv.evaluate(Test_data2, Test_labelsData0 , verbose=0)
+Prediction1 =  model_conv.predict(Test_data2)
+R1 =  Prediction1.argmax(axis=-1)
+
+print("Second Model ")
+scores2 = model_conv2.evaluate(Test_data2, Test_labelsData0 , verbose=0)
+
+sequencesTrain= tokenizer.texts_to_sequences(traintext)
+sequencesTrain2 = pad_sequences(sequencesTrain, maxlen=MSEQUENCE_LENGTH)
+
+scoresALL = model_conv.evaluate(sequencesTrain2 , Test_labelsData0 , verbose=0)
+print("Accuracy predi without: %.2f%%" % (scoresALL[1]*100))
+print('Loss fuction predi without: % 6.4f' % scoresALL[0])
+PredictionAll =  model_conv.predict(sequencesTrain2)
+RAll =  PredictionAll.argmax(axis=-1)
+#RAll =   model_conv.predict_classes(sequencesTrain2)
+
+scoresALL2 = model_conv2.evaluate(sequencesTrain2 , Test_labelsData0 , verbose=0)
+
+
+#-------------------------------------------------------------------------------
+# Writing the result in txt file
+       
+ff = open(NameFielWriting,"a+",encoding='utf-8')
+ff.write(" Model :  the first model is CNN-LSTM")
+ff.write("\n")
+ff.write(" Original data : Accuracy: %.2f%%" % (scoresALL[1]*100)+ ' Loss fuction: % 6.4f' % scoresALL[0])
+ff.write("\n")
+ff.write(" With Perturbations : Accuracy: %.2f%%" % (scores[1]*100)+ ' Loss fuction: % 6.4f' % scores[0])
+ff.write("\n")
+ff.write("\n")
+
+ff = open(NameFielWriting,"a+",encoding='utf-8')
+ff.write(" Model :the Second Model LSTM")
+ff.write("\n")
+ff.write(" Original data : Accuracy: %.2f%%" % (scoresALL2[1]*100)+ ' Loss fuction: % 6.4f' % scoresALL2[0])
+ff.write("\n")
+ff.write(" With Perturbations : Accuracy: %.2f%%" % (scores2[1]*100)+ ' Loss fuction: % 6.4f' % scores2[0])
+ff.write("\n")
+ff.write("\n")    
+    
+
+f =0   
+    
+ff.write("\n")
+ff.write("------------------------------------------------------------------")
+ff.write("\n")
+t =0 
+
+
+TOTALADVERSRAIL = 0
+TOTALWORDS = []
+
+Yes = 0
+No =0
+ArrayWriting = min(len(FixMissspleingList), len(traintext),len(NewNewTest_labels),len(PredictionAll),len(RAll) ,len(NumberWords),len(FixMissspleingList))
+being = 0
+while being < ArrayWriting :
+    if (RAll[being] != R1[being]) and (NewNewTest_labels[being] == RAll[being]):
+            #TotalAE = TotalAE + 1 
+            TOTALADVERSRAIL = TOTALADVERSRAIL + 1
+            #print ("", TotalAE )
+            StrInfo = ""
+            StrInfo = StrInfo + str(t)+"-"
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +str(FixMissspleingList[being])
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +str(traintext[being])
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +"#Word :"+ str(NumberWords[being]) #NumberAdjetcivtes[t-1]
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +" True label: "
+            StrInfo = StrInfo +str(NewNewTest_labels[being]) # + " the original"+ str(Test_labelsDataAll[k])
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +str(RAll[being])
+            StrInfo = StrInfo +" ,"
+            StrInfo = StrInfo +str( PredictionAll[np.argmax(PredictionAll[being])]*100 )
+            StrInfo = StrInfo +", preddiction:"
+            StrInfo = StrInfo +str( PredictionAll[being])
+            StrInfo = StrInfo +" ,"
+            StrInfo = StrInfo +str(Original[being])
+            TOTALWORDS.append(Original[being])
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +"Result of AE"
+            StrInfo = StrInfo +"\n"
+            StrInfo = StrInfo +str(R1[being])
+            StrInfo = StrInfo +" ,"
+            StrInfo = StrInfo +str(Prediction1[being][np.argmax(Prediction1[being])]*100 )
+            StrInfo = StrInfo +" , preddiction: "
+            StrInfo = StrInfo +str( Prediction1[being])
+            StrInfo = StrInfo +" ,"
+            StrInfo = StrInfo +str(Change[being])
+            StrInfo = StrInfo +" ,"
+            StrInfo = StrInfo +str(InD[being])
+            if (InD[being] == "Yes" or "Yes in InD[being]):
+                print(InD[being] )
+                Yes = Yes + 1
+            if (InD[being] == "No" or "No in InD[being]):
+                print(InD[being] )
+                No = No + 1
+            ff.write(StrInfo)
+            ff.write("\n")
+            ff.write("....................")
+            ff.write("\n")
+            
+    being = being + 1
+    
+senstesne = " the totla of AE "+ str(TOTALADVERSRAIL) + " th All " + str(len(FixMissspleingList))
+SenYesNo = " the NUmber Yes "+ str(Yes) + " the Number No " + str(No)
+ff.write("--------------------------------------------------------------")
+ff.write(senstesne)
+ff.write("\n")    
+ff.write("--------------------------------------------------------------")
+ff.write(SenYesNo)
+ff.write("\n")
+ff.close()
+
+
+# to print the most common words that attck the models
+import collections
+counter = collections.Counter(TOTALWORDS)
+# Note you can writ the result to file 
+print(counter.most_common())
+print(datetime.datetime.now().time())
+
+
+
+
+
+ 
