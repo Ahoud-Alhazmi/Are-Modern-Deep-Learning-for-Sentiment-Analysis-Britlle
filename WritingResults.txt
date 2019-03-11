@@ -1,0 +1,111 @@
+
+# Write the Name of File that is written the Results.
+NameFielWriting = "SwapAdjAdv.txt"   
+
+
+
+#-------------------------------------------------------------------------------
+# Writing the result in txt file
+
+def PrintResult(scoresALL,scores,scoresALL2 ,scores2,FixMissspleingList, traintext,NewNewTest_labels,PredictionAll,RAll,NumberWords,Original,Change,InD):
+       
+	ff = open(NameFielWriting,"a+",encoding='utf-8')
+	ff.write(" Model :  the first model is CNN-LSTM")
+	ff.write("\n")
+	ff.write(" Original data : Accuracy: %.2f%%" % (scoresALL[1]*100)+ ' Loss fuction: % 6.4f' % scoresALL[0])
+	ff.write("\n")
+	ff.write(" With Perturbations : Accuracy: %.2f%%" % (scores[1]*100)+ ' Loss fuction: % 6.4f' % scores[0])
+	ff.write("\n")
+
+	ff = open(NameFielWriting,"a+",encoding='utf-8')
+	ff.write(" Model :the Second Model LSTM")
+	ff.write("\n")
+	ff.write(" Original data : Accuracy: %.2f%%" % (scoresALL2[1]*100)+ ' Loss fuction: % 6.4f' % scoresALL2[0])
+	ff.write("\n")
+	ff.write(" With Perturbations : Accuracy: %.2f%%" % (scores2[1]*100)+ ' Loss fuction: % 6.4f' % scores2[0])
+	ff.write("\n")
+	ff.write("\n")    
+    
+
+	#f =0   
+    
+	ff.write("\n")
+	ff.write("------------------------------------------------------------------")
+	ff.write("\n")
+
+
+	TOTALADVERSRAIL = 0
+	TOTALWORDS = []
+
+	Yes = 0
+	No =0
+	ArrayWriting = min(len(FixMissspleingList), len(traintext),len(NewNewTest_labels),len(PredictionAll),len(RAll) ,len(NumberWords))
+	being = 0
+	while being < ArrayWriting :
+		if (RAll[being] != R1[being]) and (NewNewTest_labels[being] == RAll[being]):
+				TOTALADVERSRAIL = TOTALADVERSRAIL + 1
+				StrInfo = ""
+				StrInfo = StrInfo +str(FixMissspleingList[being])
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +str(traintext[being])
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +"#Word :"+ str(NumberWords[being]) 
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +" True label: "
+				StrInfo = StrInfo +str(NewNewTest_labels[being]) # + " the original"+ str(Test_labelsDataAll[k])
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +str(RAll[being])
+				StrInfo = StrInfo +" ,"
+				StrInfo = StrInfo +str( PredictionAll[np.argmax(PredictionAll[being])]*100 )
+				StrInfo = StrInfo +", preddiction:"
+				StrInfo = StrInfo +str( PredictionAll[being])
+				StrInfo = StrInfo +" ,"
+				StrInfo = StrInfo +str(Original[being])
+				TOTALWORDS.append(Original[being])
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +"Result of AE"
+				StrInfo = StrInfo +"\n"
+				StrInfo = StrInfo +str(R1[being])
+				StrInfo = StrInfo +" ,"
+				StrInfo = StrInfo +str(Prediction1[being][np.argmax(Prediction1[being])]*100 )
+				StrInfo = StrInfo +" , preddiction: "
+				StrInfo = StrInfo +str( Prediction1[being])
+				StrInfo = StrInfo +" ,"
+				StrInfo = StrInfo +str(Change[being])
+				StrInfo = StrInfo +" ,"
+				StrInfo = StrInfo +str(InD[being])
+				if (InD[being] == "Yes" or "Yes in InD[being]):
+					Yes = Yes + 1
+				if (InD[being] == "No" or "No in InD[being]):
+					No = No + 1
+				ff.write(StrInfo)
+				ff.write("\n")
+				ff.write("....................")
+				ff.write("\n")
+            
+		being = being + 1
+    
+	senstesne = " the total of AE "+ str(TOTALADVERSRAIL) + " th All " + str(len(FixMissspleingList))
+	SenYesNo = " the NUmber Yes "+ str(Yes) + " the Number No " + str(No)
+	ff.write("--------------------------------------------------------------")
+	ff.write(senstesne)
+	ff.write("\n")    
+	ff.write("--------------------------------------------------------------")
+	ff.write(SenYesNo)
+	ff.write("\n")
+	ff.close()
+
+
+	# to print the most common words that attck the models
+	import collections
+	counter = collections.Counter(TOTALWORDS)
+	# Note you can writ the result to file 
+	print(counter.most_common())
+
+
+
+
+
+
+ 
