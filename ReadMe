@@ -2,9 +2,8 @@
 
 Note: for each folder , there are model and three other files for attacking this model. 
 
-1. Run the model
-2. Select one of the attacking files.
-3. identify  one of the strategies ( Swap , Shuffle, or Antonym)
+1. Run the models (LSTM and CNN-LSTM). Save the models and use the same names for load the model in step 2 
+2. Select one of the attacking files. 
+3. Identify one of the strategies (Swap , Shuffle, or Antonym)
 4. Determine target Tokens. 
 5. Write the name file that will be saved the results.
-
