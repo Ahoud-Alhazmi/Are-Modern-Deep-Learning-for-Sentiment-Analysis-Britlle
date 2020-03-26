@@ -2,12 +2,13 @@
 
 Note: for each folder, there are models and three other files for attacking these models. 
 
-1. Downloads the datasets:IMDB and YELP Review as csv file. 
+1. Downloads the datasets:IMDB, YELP Review and MR datasets as csv file. 
 2. Run the models (LSTM and CNN-LSTM). Save the models and use the same names for load the model in step 2 
 3. Select one of the attacking files. 
 4. Identify one of the strategies (Swap , Shuffle, or Antonym)
 5. Determine target Tokens. 
 6. Write the name file that will be saved the results.
+
 
 
 
