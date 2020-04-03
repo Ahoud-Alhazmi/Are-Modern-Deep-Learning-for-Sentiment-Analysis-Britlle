@@ -1,5 +1,46 @@
-#The instructions for running the code
 
+Title 
+--------------------------------------------------------
+Are Modern Deep Learning Models for Sentiment Analysis Brittle? An Examination on Part-of-Speech
+
+
+Datasets
+--------------------------------------------------------
+Download datasets from
+1.	IMDB : http://ai.stanford.edu/amaas/data/sentiment/
+2.	Yelp-Reviews: https://www.yelp.com/dataset/challenge
+3. MR: http://www.cs.cornell.edu/people/pabo/movie-review-data/
+
+Setup
+--------------------------------------------------------
+You need Python 3, and all system dependencies possibly required by (Keras , NLTK , Pandas , Seaborn , Numpy , IPython.display and Matplotlib)
+
+
+Tokens
+-------------------------------------------------------
+  1. Adjectives (Adj) 
+  2. Verbs (Verb)
+  3. Adverbs (Adv) 
+  4. The combinations of adjectives and adverbs (Adj-Adv)
+  5. The combinations of adjectives and verbs (Adj-Verb)
+  6. The combinations of verbs and adverbs (Verb-Adv)
+  7. The combination among adjectives, verbs, and adverbs (All)
+
+
+Perturbations on Words
+--------------------------------------------------------
+    1. Swap
+    2. Middle Shuffle
+    3. Transformation
+
+
+Attack Model
+--------------------------------------------------------
+The model is Bidirectional LSTM  and CNN-LSTM 
+
+
+#The instructions for running the code
+--------------------------------------------------------
 Note: for each folder, there are models and three other files for attacking these models. 
 
 1. Downloads the datasets:IMDB, YELP Review and MR datasets as csv file. 
@@ -8,12 +49,6 @@ Note: for each folder, there are models and three other files for attacking thes
 4. Identify one of the strategies (Swap , Shuffle, or Antonym)
 5. Determine target Tokens. 
 6. Write the name file that will be saved the results.
-
-
-
-
-
-
 
 
 
