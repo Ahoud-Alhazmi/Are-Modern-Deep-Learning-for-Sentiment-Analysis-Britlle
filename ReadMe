@@ -36,7 +36,7 @@ Perturbations on Words
 
 Attack Model
 --------------------------------------------------------
-The model is Bidirectional LSTM  and CNN-LSTM 
+The models are Bidirectional LSTM  and CNN-LSTM 
 
 
 #The instructions for running the code
