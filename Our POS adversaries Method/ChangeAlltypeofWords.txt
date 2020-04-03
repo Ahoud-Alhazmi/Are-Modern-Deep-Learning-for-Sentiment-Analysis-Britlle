@@ -1,0 +1,340 @@
+
+
+# Select the perturbation Words
+Strategy = "Swap"    # Strategy = "Shuffle"   or Strategy = "Transformation"
+
+# Determine Token is Adjective,Verb  and Adverb Combination
+DetermineToken1 = "All"
+
+# Write the Name of File that is written the Results.
+NameFielWriting = "SwapAll.txt"   
+
+# Read the data
+
+
+ #-------------------------
+ # Here you need to read the data
+ # Load training data in the training texts in "texts" variable and labelsTest and training labels in "Train_labels" variable
+ # Load Test data in the test texts in "textsTest" variable and labelsTest and training labels in "labelsTest"
+
+
+
+# 1. Load Dataset and the Models
+#  The Library
+import time   
+import nltk
+from nltk.corpus import wordnet
+from nltk import SpaceTokenizer
+from random import randint
+import os
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import numpy as np
+import random
+import numpy
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
+from keras.layers.embeddings import Embedding
+from keras.preprocessing import sequence
+from keras.datasets import imdb
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import keras.utils
+from keras import utils as np_utils
+from keras.utils import to_categorical
+from keras import models
+import datetime
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import nltk
+from nltk.corpus import stopwords
+
+
+
+print(datetime.datetime.now().time())
+
+# Load the model 
+from keras.models import load_model
+#  the first Model is CNN-LSTM
+model_conv = load_model('modelCNNLSTM5IMDB.h5')
+model_conv.summary()
+#  the Second Model is LSTM
+model_conv2 = load_model('modelLSTMBIMDB.h5')
+model_conv2.summary()
+
+
+
+
+
+NUM_WORDS=5000 
+MSEQUENCE_LENGTH=500 
+
+tokenizer = Tokenizer(num_words=NUM_WORDS)
+tokenizer.fit_on_texts(texts)
+
+
+
+# Modified the words
+word_index = tokenizer.word_index
+
+def swap(TryWord):
+    OldWord = TryWord 
+    if len(TryWord) >= 4 :
+        tray = 0
+        #while ( TryWord == OldWord or tray != 2 ) :
+        x = list(TryWord)
+        e= randint(1, len(TryWord)-2)  # if I cahne 0 to 1  it will become like papers
+        f = e+1   #   Note : about index out of range
+        x[e], x[f] = x[f], x[e]
+        TryWord = ''.join(x)  
+        tray = tray + 1
+    return TryWord
+
+
+def shuffle(TryWord):
+    if len(TryWord) >= 4 :
+        wordlen = len(TryWord)
+        TryWord = list(TryWord)
+        for i in range(1,wordlen-2):
+            pos = randint(i+1,wordlen-2)
+            TryWord[i], TryWord[pos] = TryWord[pos], TryWord[i]
+        TryWord = "".join(TryWord)
+    return TryWord
+
+	
+
+from nltk.corpus import wordnet as wn
+
+def transform ( TragetWords):
+ 
+    forms = set() 
+    for happy_lemma in wn.lemmas(TragetWords): 
+        forms.add(happy_lemma.name())
+        for related_lemma in happy_lemma.derivationally_related_forms():
+            forms.add(related_lemma.name())
+    forms2 = list(forms)
+    #print ( "forms ", forms)
+    if TragetWords in forms2:
+        forms2.remove(TragetWords)
+    ResultWords = ""
+    if len(forms2) == 0  :
+        if num == 1:
+            ResultWords = TragetWords+"r"
+        elif  num == 2:
+            ResultWords = TragetWords+"ed"
+        else :
+            ResultWords = TragetWords+"ing"
+    else :
+        
+        #print (forms2)
+        ResultWords = forms2[len(forms2)-1]
+ 
+            
+    return ResultWords
+
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+
+def ChangingWords(givenText, ThePosition): 
+    sent =  givenText
+   # words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    info = ""
+    l = 0
+    NewList =""
+    limit = 0 
+    limit2 = 0
+    limit3 =0 
+    while ( l < k):
+        i , j = words2[l]
+        if (len(i)>=4) and  (j == 'JJ' or j == 'JJR' or j == 'JJS' ) :    
+            limit = limit + 1
+            if limit == ThePosition : 
+                info =  info + i 
+                print (" verb:" , i)
+                newowrd = shuffle(i)
+                info = info+";"+ newowrd
+                if newowrd in word_index :
+                    info = info+";"+"Yes"+" - "
+                else :
+                    info = info+";"+ "No"+" - "
+                limit = limit + 1
+            else :
+                newowrd = i  
+            NewList += newowrd + " "  
+                
+        elif (len(i)>=4) and  (j == 'VB' or j == 'VBD' or j == 'VBG'  or j == 'VBN'  or j == 'VBP'  or j == 'VBZ') :    
+            limit2 = limit2 + 1
+            if limit2 == ThePosition : 
+                info = info + i 
+                print (" Adv:" , i)
+                newowrd = shuffle(i)
+                info = info+";"+ newowrd
+                if newowrd in word_index :
+                    info = info+";"+"Yes"+" - "
+                else :
+                    info = info+";"+ "No"+" - "
+                limit2 = limit2 + 1
+            else :
+                newowrd = i  
+            NewList += newowrd + " " 
+            
+        elif  (len(i)>=4) and (j == 'RB' or j == 'RBR' or j == 'RBS') :    
+            limit3 = limit3 + 1
+            if limit3 == ThePosition : 
+                info = info + i 
+                print (" Adj:" , i)
+                newowrd = shuffle(i)
+                info = info+";"+ newowrd
+                if newowrd in word_index :
+                    info = info+";"+"Yes"+" - "
+                else :
+                    info = info+";"+ "No"+" - "
+                limit3 = limit3 + 1
+            else :
+                newowrd = i  
+            NewList += newowrd + " " 
+        else : 
+            NewList += i + " " 
+        l = l + 1
+    return (NewList, info)
+
+#---------------------
+
+def TheNumberofAdjective(givenText):
+    sent =  givenText
+    #words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    l = 0
+    Num = 0 
+    while ( l < k):
+        i , j = words2[l]
+        if (len(i) >= 4  ) and (j == 'JJ' or j == 'JJR' or j == 'JJS'):
+            Num = Num + 1
+        l = l +1
+    return Num
+
+#------------------------------------	
+def TheNumberofAdverb(givenText):
+    sent =  givenText
+    #words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    l = 0
+    Num = 0 
+    while ( l < k):
+        i , j = words2[l]
+        if (len(i) >= 4  ) and (j == 'RB' or j == 'RBR' or j == 'RBS'):
+            Num = Num + 1
+        l = l +1
+    return Num
+
+#--------------------------------------------	
+def TheNumberofVerb(givenText):
+    sent =  givenText
+    #words = SpaceTokenizer().tokenize(sent)
+    words = sent.split()
+    words2 = nltk.pos_tag(words)
+    k = len(words2)
+    l = 0
+    Num = 0 
+    while ( l < k):
+        i , j = words2[l]
+        if (len(i) >= 4  ) and (j== 'VB' or j == 'VBD' or j == 'VBG'  or j == 'VBN'  or j == 'VBP'  or j == 'VBZ'):
+            Num = Num + 1
+        l = l +1
+    return Num
+   
+ 
+
+
+
+Original = []
+Change = []
+InD =[]
+
+NumberWords = []
+    
+FixMissspleingList =[] 
+NewTest_labelsFixx = []
+
+NewNewTest_texts = []
+NewNewTest_labels = []
+traintext = []
+trainlabel = []
+
+TotalWords1 = 0
+TotalWords2 = 0
+TotalWords3 = 0
+# NOTE : the Test data that only change 
+h = 0
+l = 0
+for Texttt in textsTest :
+    Num = TheNumberofVerb(Texttt)
+    Num2 = TheNumberofAdverb(Texttt)
+    Num3 = TheNumberofAdjective(Texttt)
+    TotalWords1 =TotalWords1  + Num2
+    TotalWords2 =  TotalWords2 + Num
+    TotalWords3 = TotalWords3 + Num3
+	
+	MinuNumber = min(Num , Num2, Num3)
+    y = 1
+    l = l + 1
+    while  y <= MinuNumber : 
+        traintext.append(Texttt)
+        NewNewTest_labels.append(labelsTest[h])
+        (NewList, info2) =ChangingWords(Texttt, y)
+        y = y + 1
+    #######################################
+        txt = info2.split(';')
+        if len(txt) >= 3 :
+            Original.append(txt[0])
+            Change.append(txt[1])
+            InD.append(txt[2])
+        FixMissspleingList.append(NewList)
+        #NewTest_labelsFixx.append(NewTest_labels[h])
+       NumberWords.append(Num)     
+    h = h + 1
+
+    
+
+
+
+# Printing the Accuracy
+sequencesTest = tokenizer.texts_to_sequences((FixMissspleingList))
+Test_data2 = pad_sequences(sequencesTest, maxlen=MSEQUENCE_LENGTH)
+Test_labelsData0 = to_categorical(np.asarray((NewNewTest_labels)))
+
+scores = model_conv.evaluate(Test_data2, Test_labelsData0 , verbose=0)
+Prediction1 =  model_conv.predict(Test_data2)
+R1 =  Prediction1.argmax(axis=-1)
+
+print("Second Model ")
+scores2 = model_conv2.evaluate(Test_data2, Test_labelsData0 , verbose=0)
+
+sequencesTrain= tokenizer.texts_to_sequences(traintext)
+sequencesTrain2 = pad_sequences(sequencesTrain, maxlen=MSEQUENCE_LENGTH)
+
+scoresALL = model_conv.evaluate(sequencesTrain2 , Test_labelsData0 , verbose=0)
+print("Accuracy predi without: %.2f%%" % (scoresALL[1]*100))
+print('Loss fuction predi without: % 6.4f' % scoresALL[0])
+PredictionAll =  model_conv.predict(sequencesTrain2)
+RAll =  PredictionAll.argmax(axis=-1)
+#RAll =   model_conv.predict_classes(sequencesTrain2)
+
+scoresALL2 = model_conv2.evaluate(sequencesTrain2 , Test_labelsData0 , verbose=0)
+
+
+
+import WritingResults
+WritingResults.PrintResult(NameFielWriting ,scoresALL,scores,scoresALL2 ,scores2,FixMissspleingList, traintext,NewNewTest_labels,PredictionAll,RAll,NumberWords,Original,Change,InD)
